@@ -1,107 +1,79 @@
 // ==Plugin==
-// @name        Минимальная кнопка
+// @name        Супер-простая кнопка
 // @version     1.0
 // ==/Plugin==
 
 (function() {
     'use strict';
 
-    // Создаем заглушку компонента
-    const component = {
-        template: `<div style="display:none"></div>`,
-        mounted() {
-            // Пустая функция
-        }
-    };
-
-    // Функция для перевода (заглушка)
-    function translate(text) {
-        // Просто возвращаем текст как есть
-        return text;
-    }
-
-    // Основная функция инициализации
-    function initMain() {
-        console.log('Минимальная кнопка запущена');
-        
-        // Регистрируем компонент (заглушка)
-        if (Lampa.Component && Lampa.Component.add) {
-            Lampa.Component.add('minimal_button', component);
-        }
-
-        // Манифест плагина (упрощенный)
-        const manifest = {
-            type: 'video',
-            version: '1.0',
-            name: 'Минимальная кнопка - 1.0',
-            description: 'Простая тестовая кнопка',
-            component: 'minimal_button'
-        };
-
-        // Регистрируем манифест
-        if (Lampa.Manifest) {
-            Lampa.Manifest.plugins = manifest;
-        }
-
-        // HTML кнопки (упрощенный SVG)
-        const buttonHTML = `
-            <div class="full-start__button selector view--minimal_button" data-subtitle="minimal_button 1.0">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M8 5v14l11-7z"/>
-                </svg>
-                <span>Тест</span>
-            </div>
+    console.log('Супер-простая кнопка запущена');
+    
+    // Создаем кнопку
+    function createButton() {
+        const button = document.createElement('div');
+        button.className = 'full-start__button selector';
+        button.style.cssText = `
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin: 5px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
         `;
-
-        // Добавляем кнопку при открытии карточки фильма
-        if (Lampa.Listener) {
-            Lampa.Listener.follow('full', function(e) {
-                if (e.type === 'complite') {
-                    // Создаем элемент кнопки
-                    const btn = $(buttonHTML);
-                    
-                    // Простой обработчик событий
-                    btn.on('hover:enter', function() {
-                        // Показываем простое уведомление
-                        if (Lampa.Noty && Lampa.Noty.show) {
-                            Lampa.Noty.show('Тестовая кнопка нажата!');
-                        } else {
-                            console.log('Тестовая кнопка нажата!');
-                        }
-                    });
-                    
-                    // Добавляем кнопку после кнопки torrent
-                    const torrentBtn = e.object.activity.render().find('.view--torrent');
-                    if (torrentBtn.length) {
-                        torrentBtn.after(btn);
-                    } else {
-                        // Если кнопки torrent нет, добавляем в начало
-                        const buttonsContainer = e.object.activity.render().find('.full-start__buttons');
-                        if (buttonsContainer.length) {
-                            buttonsContainer.prepend(btn);
-                        }
-                    }
-                }
-            });
-        }
+        
+        button.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style="margin-right: 10px;">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+            <span style="color: white;">Тест</span>
+        `;
+        
+        // Обработчик клика
+        button.addEventListener('click', function() {
+            console.log('Супер-простая кнопка нажата!');
+        });
+        
+        // Добавляем эффект при наведении
+        button.addEventListener('mouseenter', function() {
+            this.style.background = 'rgba(255,255,255,0.2)';
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            this.style.background = 'rgba(255,255,255,0.1)';
+        });
+        
+        return button;
     }
-
-    // Запускаем плагин при загрузке
-    function startPlugin() {
-        if (window.Lampa) {
-            initMain();
-        } else {
-            // Ждем загрузки Lampa
-            const checkLampa = setInterval(function() {
-                if (window.Lampa) {
-                    clearInterval(checkLampa);
-                    initMain();
-                }
-            }, 100);
-        }
+    
+    // Функция добавления кнопки
+    function addButton() {
+        // Ищем контейнер с кнопками
+        const buttonsContainer = document.querySelector('.full-start__buttons');
+        if (!buttonsContainer) return;
+        
+        // Проверяем, не добавлена ли уже наша кнопка
+        if (document.querySelector('.super-simple-button-added')) return;
+        
+        // Создаем и добавляем кнопку
+        const button = createButton();
+        button.classList.add('super-simple-button-added');
+        buttonsContainer.appendChild(button);
     }
-
-    // Запускаем плагин
-    startPlugin();
+    
+    // Пытаемся добавить кнопку сразу
+    addButton();
+    
+    // И следим за изменениями DOM
+    const observer = new MutationObserver(function(mutations) {
+        for (let mutation of mutations) {
+            if (mutation.type === 'childList') {
+                addButton();
+            }
+        }
+    });
+    
+    observer.observe(document.body, { childList: true, subtree: true });
 
 })();
